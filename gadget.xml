@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+    <ModulePrefs title="BroserGames Forum 2010 - Gadget">
+        <Require feature="opensocial-0.9" />
+        <Require feature="views" />
+        <Require feature="opensocial-data" />
+        <Require feature="opensocial-templates">
+        </Require>
+        <Require feature="osapi" />
+        <Require feature="org.jquery.core-1.4.2" />
+        
+        <AllowedDomain name="api.twitter.com" />
+    </ModulePrefs>
+    <Content type="html" view="canvas" href="external.html">
+    </Content>
+</Module>

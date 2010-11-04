@@ -1,0 +1,68 @@
+<script xmlns:os="http://ns.opensocial.org/2008/markup" type="text/os-data">
+    <os:PeopleRequest key="Viewer" userId="@viewer" groupId="@self"/>
+    <os:PeopleRequest key="ViewerFriends" userId="@viewer" groupId="@friends"/>
+    <os:PersonAppDataRequest key="twitterName" userId="@viewer" fields="twitterName" />
+    <os:PersonAppDataRequest key="twitterNameFriends" userId="@viewer" groupId="@friends" fields="twitterName" />
+
+</script>
+<script type="text/os-template" xmlns:os="http://ns.opensocial.org/2008/markup" require="Viewer">
+    Hello ${Viewer.displayName}
+    <div if="${Viewer.isOwner}">
+        <p>Enter your Twitter Name:</p>
+        <input type="text" id="twitterName" value="${twitterName}" />
+        <input type="submit" id="submitTwitterName" value="Save" />
+    </div>
+</script>
+<script type="text/os-template" xmlns:os="http://ns.opensocial.org/2008/markup" require="feed" autoUpdate="true">
+    <ul>
+        <li repeat="${feed}">
+            #${Context.Index}: ${Cur.text} (${Cur.created_at})
+        </li>
+    </ul>
+</script>
+<script type="text/os-template" xmlns:os="http://ns.opensocial.org/2008/markup" require="ViewerFriends">
+    <ul>
+        <li repeat="${ViewerFriends}">
+            <a href="javascript:;" id="${Cur.id}" class="friendLink">${Cur.displayName}</a>
+        </li>
+    </ul>
+</script>
+<script type="text/javascript">
+    function loadFeed(twitterName) {
+        var params = {};
+        params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.JSON;
+
+        gadgets.io.makeRequest(
+        'http://api.twitter.com/1/statuses/user_timeline.json?screen_name=' + twitterName,
+        function(response) {
+            opensocial.data.DataContext.putDataSet('feed', response.data);
+        },
+        params);
+    }
+    gadgets.util.registerOnLoadHandler(function() {
+        var viewer = opensocial.data.DataContext.getDataSet('Viewer');
+        var twitterName = opensocial.data.DataContext.getDataSet('twitterName');
+        var twitterNameFriends = opensocial.data.DataContext.getDataSet('twitterNameFriends');
+
+        if (twitterName != false) {
+            twitterName = twitterName[viewer.id].twitterName;
+            loadFeed(twitterName);
+        }
+
+        $('#submitTwitterName').click(function() {
+            osapi.appdata.update(
+                {userId: '@viewer',
+                data: {twitterName: $('#twitterName').val()}
+            }).execute(function() {
+                loadFeed($('#twitterName').val());
+            });
+        });
+
+        $('.friendLink').click(function() {
+            var friendId = $(this).attr('id');
+            if (twitterNameFriends[friendId]) {
+                loadFeed(twitterNameFriends[friendId].twitterName);
+            }
+        });
+    });
+</script>
