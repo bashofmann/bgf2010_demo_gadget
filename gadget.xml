@@ -1,16 +1,77 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
-    <ModulePrefs title="BroserGames Forum 2010 - Gadget">
+    <ModulePrefs title="OpenSocial Europe Summit 2010 - Gadget">
         <Require feature="opensocial-0.9" />
         <Require feature="views" />
         <Require feature="opensocial-data" />
         <Require feature="opensocial-templates">
+            <Param name="requireLibrary">templates.xml</Param>
         </Require>
         <Require feature="osapi" />
         <Require feature="org.jquery.core-1.4.2" />
-        
-        <AllowedDomain name="api.twitter.com" />
+        <Require feature="embed" />
+        <Require feature="pubsub" />
+        <OAuth>
+          <Service name="MyTwitter">
+            <Request url="https://api.twitter.com/oauth/request_token" param_location="uri-query" />
+            <Access url="https://api.twitter.com/oauth/access_token" param_location="uri-query" />
+            <Authorization url="https://api.twitter.com/oauth/authorize" param_location="uri-query" />
+          </Service>
+        </OAuth>
     </ModulePrefs>
-    <Content type="html" view="canvas" href="external.html">
+    <Content type="html" view="canvas,mobilecanvas" xmlns:os="http://ns.opensocial.org/2008/markup" href="external.php" authz="signed" >
+        <os:PeopleRequest key="Viewer" userId="@viewer" groupId="@self"/>
+    </Content>
+
+    <Content type="html" view="embed">
+        <![CDATA[
+        <div id='__MODULE_ID__tweet'></div>
+        <script type="text/javascript">
+
+            gadgets.util.registerOnLoadHandler(function() {
+                var params = {};
+                params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.JSON;
+                var id = gadgets.views.getParams()['id'];
+                gadgets.io.makeRequest(
+                    'http://api.twitter.com/1/statuses/show/' + id + '.json',
+                    function(response) {
+                        $('#__MODULE_ID__tweet').html(response.data.text);
+                    },
+                params);
+            });
+        </script>
+
+         <script type="text/javascript">
+            function callback(sender, message) {
+              document.getElementById("output").innerHTML =
+                "message : " + gadgets.util.escapeString(message + "") + "<br/>" +
+                "sender : " + gadgets.util.escapeString(sender);
+            }
+
+            function subscribe() {
+              gadgets.pubsub.subscribe("random-number", callback);
+            }
+
+            function unsubscribe() {
+              gadgets.pubsub.unsubscribe("random-number");
+              document.getElementById("output").innerHTML = "";
+            }
+
+            function publish() {
+              var message = Math.random();
+              gadgets.pubsub.publish("random-number", message);
+              document.getElementById("output").innerHTML = message;
+            }
+
+        </script>
+        <div>
+        <input type="button" value="Subscribe" onclick="subscribe()"/>
+        <input type="button" value="Unsubscribe" onclick="unsubscribe()"/>
+        <input type="button" value="Publish a random number" onclick="publish()"/>
+        </div>
+        <div id="output">
+        </div>
+
+        ]]>
     </Content>
 </Module>

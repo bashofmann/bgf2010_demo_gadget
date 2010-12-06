@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Templates xmlns:abc="http://example.com/myapp" xmlns:os="http://ns.opensocial.org/2008/markup">
+    <Namespace prefix="abc" url="http://example.com/myapp" />
+
+    <Template tag="abc:feedList">
+        <os:Var key="counter" value="0" />
+        <ul>
+            <li repeat="${My.entries}">
+                #${Context.Index}: ${Cur.text} (${Cur.created_at})
+                <a href="javascript:postToWall(${Cur.id});">post</a>
+                <os:Var key="counter" value="${counter + 1}" />
+            </li>
+        </ul>
+        Sum: ${counter}        
+    </Template>
+</Templates>
